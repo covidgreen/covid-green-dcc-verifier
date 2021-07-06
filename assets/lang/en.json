@@ -1,0 +1,72 @@
+{
+  "common": {
+    "name": "Ireland DCC Verifier",
+    "ireland": "Ireland",
+    "dccVerifier": "DCC Verifier",
+    "settings": "Settings",
+    "scan": "Scan",
+    "retry": "Retry",
+    "closeScanner": "Close Scanner",
+    "dob": "DOB",
+    "targetDisease": "Target Disease",
+    "nextScan": "Next Scan",
+    "nextScanIn": "Next Scan in",
+    "targetedDisease": "Targeted disease",
+    "vaccineOrProphylaxis": "Vaccine or Prophylaxis",
+    "vaccineProduct": "Vaccine product",
+    "manufacturer": "Manufacturer",
+    "doseNumber": "Dose number",
+    "totalDoses": "Total doses",
+    "vaccinationDate": "Date of vaccination",
+    "autoCount": "Auto Count",
+    "autoCountInfo": "Enable / Disable the countdown time on the 'Next Scan' button after scans.",
+    "appData": "App Data",
+    "refreshAppData": "Refresh app data",
+    "refreshAppDataInfo": "Data was last refreshed at {{date}}",
+
+    "testType": "Test type",
+    "testName": "Test name",
+    "testDevice": "Test device",
+    "testDateTime": "Test date/time",
+    "testResult": "Test Result",
+    "testingCenter": "Testing center",
+
+    "firstPositive": "First positive NAAT test date",
+    "validFrom": "Valid from",
+    "validUntil": "Valid until",
+
+    "country": "Country",
+    "certificateIssuer": "Certificate issuer",
+    "certificateId": "Certificate ID",
+
+    "pcrCert": "PCR Certificate",
+    "vaccineCert": "Vaccine Certificate",
+    "recoveryCert": "Recovery Certificate",
+    "unknownCert": "Unknown certificate type",
+
+    "passengerDestination": "Passenger destination",
+    "passengerDestinationPlaceholder": "Select passenger destination",
+    "yourLocation": "Your location",
+    "yourLocationPlaceholder": "Select your location",
+
+    "build": "Build - {{env}}",
+    "buildNumber": "Build number",
+    "version": "Version"
+  },
+
+  "err": {
+    "NO_CAMERA_ACCESS": "No access to camera",
+    "TEST_EXPIRED": "Test expired",
+    "INVALID_QR": "Invalid QR",
+    "INVALID data": "Invalid data",
+    "INVALID_SIGNATURE": "Invalid signature",
+    "UNKNOWN_SIG_ALGO": "Unsupported encoding algorithm",
+    "NO_MATCHING_SIG_KEY": "Unable to find signature key",
+    "CERT_EXPIRED": "Certificate has expired",
+    "INVALID_STRUCTURE": "The cert data structure is incorrect",
+    "UNKNOWN": "Unknown error",
+    "noData": "Unable to fetch data",
+    "noDataMessage": "Scanning will not be available."
+
+  }
+}
