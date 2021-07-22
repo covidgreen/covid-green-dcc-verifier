@@ -23,6 +23,7 @@
     "appData": "App Data",
     "refreshAppData": "Refresh app data",
     "refreshAppDataInfo": "Data was last refreshed at {{date}}",
+    "oldConfigNotice": "24 hours since config was updated",
 
     "testType": "Test type",
     "testName": "Test name",
@@ -39,7 +40,7 @@
     "certificateIssuer": "Certificate issuer",
     "certificateId": "Certificate ID",
 
-    "pcrCert": "PCR Certificate",
+    "pcrCert": "Test Certificate",
     "vaccineCert": "Vaccine Certificate",
     "recoveryCert": "Recovery Certificate",
     "unknownCert": "Unknown certificate type",
@@ -66,7 +67,7 @@
     "INVALID_STRUCTURE": "The cert data structure is incorrect",
     "UNKNOWN": "Unknown error",
     "noData": "Unable to fetch data",
-    "noDataMessage": "Scanning will not be available."
-
+    "noDataMessage": "Scanning will not be available.",
+    "ruleFailed": "Rule failed"
   }
 }

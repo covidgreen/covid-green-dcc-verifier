@@ -37,7 +37,7 @@ export default async function fetch<T>(
   })
     .then<Response<T>>(async res => {
       const body = res.bodyString ? ((await res.json()) as T) : null
-      console.log('API_RESPONSE:', res.status, body)
+      console.log('API_RESPONSE:', res.status)
 
       return {
         status: res.status,
@@ -48,10 +48,16 @@ export default async function fetch<T>(
       // rnsp package throws with string OR even with response
       // it throws for 401 too, which regular fetch doesn't
       // this catch streamlines it all
-      const body = err.json
-        ? await err.json()
-        : { errors: [{ code: 'API_ERROR', message: 'Unable to request data' }] }
-
+      let body = {}
+      try {
+        body = err.json
+          ? await err.json()
+          : {
+              errors: [
+                { code: 'API_ERROR', message: 'Unable to request data' },
+              ],
+            }
+      } catch (e) {}
       console.log('API_ERROR:', err)
 
       return {

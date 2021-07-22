@@ -82,7 +82,7 @@ const CustomTheme = {
     error: '#DF4F41',
     redLight: '#F2DEE5',
     redLighter: '#EFDFE5',
-    warning: '#F0B442',
+    warning: '#FFFACF',
     background: {
       default: '#FBFBFB',
       dark: '#122C5A',

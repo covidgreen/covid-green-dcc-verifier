@@ -85,7 +85,11 @@ export default function Scan({ navigation }: SettingsProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const { prefs, toggleAutoCount } = usePreferences()
-  const { refetch: refetchConfig, loading: configLoading } = useConfig()
+  const {
+    refetch: refetchConfig,
+    loading: configLoading,
+    refreshedAt,
+  } = useConfig()
 
   return (
     <View style={styles.container}>
@@ -135,7 +139,9 @@ export default function Scan({ navigation }: SettingsProps) {
           )}
         </View>
         <Text style={[styles.infoText, { color: theme.palette.grey }]}>
-          {t('refreshAppDataInfo', { date: formatDateTime(new Date()) })}
+          {t('refreshAppDataInfo', {
+            date: formatDateTime(new Date(refreshedAt)),
+          })}
         </Text>
       </View>
       <View style={styles.footer}>

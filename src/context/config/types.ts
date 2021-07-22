@@ -29,6 +29,7 @@ export type SigningKey = {
   x: string
   y: string
   country: string
+  pem?: string
 }
 
 export type SigningKeys = SigningKey[]
@@ -45,5 +46,6 @@ export type ContextType = {
   config: ConfigType | null
   error: Error
   loading: boolean
-  refetch: () => Promise<void>
+  refetch: () => void
+  refreshedAt: string
 }

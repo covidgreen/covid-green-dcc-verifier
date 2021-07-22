@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useRef,
   useEffect,
+  useState,
 } from 'react'
 
 import { isMountedRef } from '@app/lib/refs'
@@ -21,14 +22,20 @@ import { LogEntry } from './types'
 const SAVE_DURATION_MS = 10 * 1000
 
 /** timer for pushing the logs to server */
-const PUSH_DURATION_MS = 5 * 60 * 1000
+const PUSH_DURATION_MS = 30 * 1000
 
 export type ContextType = {
   log: (_: VerificationResult) => void
+  pushedAt: Date
+  pushToServer: () => Promise<void>
 }
 
 const initialContext: ContextType = {
   log: () => {
+    // @todo implement
+  },
+  pushedAt: undefined,
+  pushToServer: async () => {
     // @todo implement
   },
 }
@@ -40,14 +47,20 @@ export function useLogger() {
 }
 
 export function LoggerProvider({ children }) {
+  const [pushedAt, setPushedAt] = useState<Date>()
   const { prefs } = usePreferences()
   const logs = useRef<LogEntry[]>([])
+
+  const pushToServer = useCallback(async () => {
+    await pushLogs()
+    setPushedAt(now())
+  }, [])
 
   useEffect(() => {
     let timer
     async function start() {
       timer = setTimeout(async () => {
-        await pushLogs()
+        await pushToServer()
 
         if (isMountedRef.current) {
           console.log('RESET PUSH TIMER')
@@ -59,7 +72,7 @@ export function LoggerProvider({ children }) {
     start()
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [pushToServer])
 
   useEffect(() => {
     let timer
@@ -90,13 +103,16 @@ export function LoggerProvider({ children }) {
     result => {
       const logEntry = transformToLog(result, { location: prefs?.location })
 
-      logs.current.push(logEntry)
       console.log('LOG:', logEntry)
+      logs.current.push(logEntry)
     },
     [logs, prefs?.location]
   )
 
-  const logger = useMemo<ContextType>(() => ({ log: log }), [log])
+  const logger = useMemo<ContextType>(
+    () => ({ log, pushedAt, pushToServer }),
+    [log, pushedAt, pushToServer]
+  )
 
   return (
     <LoggerContext.Provider value={logger}>{children}</LoggerContext.Provider>

@@ -4,12 +4,15 @@ import React, {
   useContext,
   useEffect,
   useState,
-  useCallback,
 } from 'react'
 import { CONFIG_URL } from 'react-native-dotenv'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import _throttle from 'lodash.throttle'
 
 import * as storage from '@app/lib/secure-storage'
 import fetch from '@app/lib/fetch'
+import { isMountedRef } from '@app/lib/refs'
+import { now } from '@app/lib/util'
 
 import { ContextType, ConfigType, Valueset } from './types'
 
@@ -34,18 +37,16 @@ const mapConfig = (c): ConfigType => ({
     vaccineProphylaxis: c.valueSets.vaccineProphylaxis.valueSetValues,
   },
   valuesetsComputed: getValuesetsComputed(c.valueSets),
-  certs: Array.isArray(c.certs)
-    ? c.certs
-    : [].concat(...Object.values(c.certs)), // TODO: remove condition when config api changes
 })
 
 const initialValue: ContextType = {
   config: null,
   error: null,
   loading: true,
-  refetch: async () => {
+  refetch: () => {
     // @todo implement
   },
+  refreshedAt: undefined,
 }
 
 const ConfigContext = createContext<ContextType>(initialValue)
@@ -67,18 +68,33 @@ type ConfigProviderProps = {
 }
 
 export function ConfigProvider({ children }: ConfigProviderProps) {
+  // counter is nothing but a hint to useEffect so that it can fetch/refetch the config
+  const [counter, setCounter] = useState(0)
+  const [refreshedAt, setRefreshedAt] = useState(null)
   const [config, setConfig] = useState<ConfigType>(null)
   const [error, setError] = useState<Error>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    async function fn() {
+      const timestamp = await AsyncStorage.getItem('refreshed_at')
+      if (timestamp) setRefreshedAt(timestamp)
+    }
+
+    fn()
+  }, [])
+
+  useEffect(() => {
     const success = async c => {
+      if (!isMountedRef.current) return
+      console.log('Config success')
       setConfig(c)
       setError(null)
       setLoading(false)
     }
 
     const failure = err => {
+      if (!isMountedRef.current) return
       setConfig(null)
       setError(err)
       setLoading(false)
@@ -88,40 +104,51 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
       setLoading(true)
 
       console.log('REQUESTING CONFIG')
-      let newConfig: ConfigType
+      // let newConfig: ConfigType
       const { status, body } = await fetch<ConfigType>(CONFIG_URL)
 
       if (status === 200) {
-        newConfig = mapConfig(body.data)
-        await storage.saveObject('config', newConfig)
-      } else {
-        console.log('REQUESTING CONFIG FAILED, Using stored config')
-        newConfig = await storage.getObject<ConfigType>('config')
+        try {
+          const newConfig = mapConfig(body.data)
+          await storage.saveObject('config', newConfig)
+
+          const timestamp = now().toISOString()
+          setRefreshedAt(timestamp)
+          await AsyncStorage.setItem('refreshed_at', timestamp)
+
+          // make sure to early return in case of success
+          return success(newConfig)
+        } catch (err) {
+          console.log('Invalid config, will fallback to stored config')
+        }
       }
-      success(newConfig)
-      console.log('Fetched config')
+
+      // If we're here, we still don't have config
+      console.log('REQUESTING CONFIG FAILED, Using stored config')
+      const storedConfig = await storage.getObject<ConfigType>('config')
+
+      if (!storedConfig) {
+        throw new Error('Unable to get config')
+      }
+
+      success(storedConfig)
     }
 
-    if (!config) {
-      try {
-        fetchConfig()
-      } catch (err) {
-        console.log('Error getting config:', err)
-        failure(err)
-      }
-    }
-  }, [config])
+    fetchConfig().catch(err => {
+      console.log('Error getting config:', err)
+      failure(err)
+    })
+  }, [counter])
 
-  // We simply need to clear from cache and local state
-  // Refetching will be a side-effect of that
-  const refetch = useCallback(async () => {
-    await storage.setItem('config', null)
-    setConfig(null)
-  }, [])
+  // As we increment the counter, useEffect kicks in and refetches the config
+  const refetch = useMemo(
+    () => _throttle(() => setCounter(c => c + 1), 10 * 1000),
+    []
+  )
 
   const value = useMemo<ContextType>(
-    () => ({ config, error, loading, refetch }),
-    [config, error, loading, refetch]
+    () => ({ config, error, loading, refetch, refreshedAt }),
+    [config, error, loading, refetch, refreshedAt]
   )
 
   return (

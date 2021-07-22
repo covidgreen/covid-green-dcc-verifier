@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import {
   createStackNavigator,
@@ -6,6 +6,8 @@ import {
 } from '@react-navigation/stack'
 import { StatusBar } from 'react-native'
 import { Provider as PaperProvider } from 'react-native-paper'
+import differenceInHours from 'date-fns/differenceInHours'
+import differenceInMinutes from 'date-fns/differenceInMinutes'
 
 import { navigationRef } from './lib/refs'
 import HomeScreen from './screens/Home'
@@ -15,6 +17,9 @@ import ScanPassScreen from './screens/ScanPass'
 import ScanFailScreen from './screens/ScanFail'
 import { useTheme } from './context/theme'
 import type { MainStackParamList, RootStackParamList } from './types/routes'
+import { useConfig } from './context/config'
+import { now } from './lib/util'
+import { useLogger } from './context/logger'
 
 const MainStack = createStackNavigator<MainStackParamList>()
 const RootStack = createStackNavigator<RootStackParamList>()
@@ -36,14 +41,33 @@ function MainScreen() {
 
 export default function Main() {
   const theme = useTheme()
+  const { refreshedAt, refetch: refetchConfig } = useConfig()
+  const { pushedAt, pushToServer } = useLogger()
 
   const getRef = ref => {
     navigationRef.current = ref
   }
 
+  const handleNavigationChange = useCallback(() => {
+    // auto refresh config
+    if (differenceInHours(now(), new Date(refreshedAt)) > 12) {
+      console.log('Config too old, attempting refetch...')
+      refetchConfig()
+    }
+
+    // push logs
+    if (differenceInMinutes(now(), pushedAt) > 2) {
+      pushToServer()
+    }
+  }, [refreshedAt, refetchConfig, pushedAt, pushToServer])
+
   return (
     <PaperProvider theme={theme}>
-      <NavigationContainer theme={theme} ref={getRef}>
+      <NavigationContainer
+        theme={theme}
+        ref={getRef}
+        onStateChange={handleNavigationChange}
+      >
         <RootStack.Navigator mode="modal" screenOptions={screenOptions}>
           <RootStack.Screen name="Main" component={MainScreen} />
           <RootStack.Screen

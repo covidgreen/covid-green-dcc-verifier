@@ -1,6 +1,8 @@
 import cose from 'cose-js'
+import cbor from 'cbor'
+import NodeRSA from 'node-rsa'
 
-import { ALGOS } from '@app/types/hcert'
+import { ALGOS, CBOR_STRUCTURE } from '@app/types/hcert'
 
 import { SigningKey } from '../config/types'
 
@@ -9,10 +11,9 @@ import * as errors from './errors'
 async function verifyECDSA(
   message: Buffer,
   keys: SigningKey[]
-): Promise<Uint8Array | Error> {
+): Promise<boolean | Error> {
   for (const key of keys) {
     try {
-      const x = new Date()
       const verifiedBuf = await cose.sign.verify(message, {
         key: {
           kid: key.kid,
@@ -21,9 +22,8 @@ async function verifyECDSA(
         },
       })
       if (verifiedBuf) {
-        console.log(new Date().getTime() - x.getTime())
         console.log('key worked', key.kid, key.country)
-        return verifiedBuf
+        return true
       }
     } catch (e) {
       console.log('Sig failed', key.kid, e)
@@ -32,10 +32,49 @@ async function verifyECDSA(
   return errors.invalidSignature()
 }
 
+const EMPTY_BUFFER = Buffer.alloc(0)
+const rsaOptions = {
+  signingScheme: {
+    scheme: 'pss',
+    hash: 'sha256',
+    saltLength: 32,
+  },
+}
+
 async function verifyRSA(
   message: Buffer,
   keys: SigningKey[]
-): Promise<Uint8Array | Error> {
+): Promise<boolean | Error> {
+  const decoded = cbor.decodeFirstSync(Buffer.from(message)).value
+  const protectedHeader = decoded[CBOR_STRUCTURE.PROTECTED_HEADER].length
+    ? decoded[CBOR_STRUCTURE.PROTECTED_HEADER]
+    : cbor.encode(EMPTY_BUFFER)
+  const signature = decoded[CBOR_STRUCTURE.SIGNATURE]
+
+  const sigStructure = [
+    'Signature1',
+    protectedHeader,
+    EMPTY_BUFFER,
+    decoded[CBOR_STRUCTURE.PAYLOAD],
+  ]
+  const toBeSigned = cbor.encode(sigStructure)
+
+  for (const key of keys) {
+    try {
+      const rsa = new NodeRSA(key.pem, 'pkcs8-public-pem')
+      rsa.setOptions(rsaOptions)
+      const result = rsa.verify(toBeSigned, signature, 'buffer')
+
+      console.log('RESULT:', result)
+      if (result) {
+        console.log('key worked', key.kid, key.country)
+        return true
+      }
+    } catch (e) {
+      console.log('Sig failed', key.kid, e)
+    }
+  }
+
   return errors.invalidSignature()
 }
 
@@ -43,7 +82,7 @@ export default async function verifySignature(
   message: Buffer,
   algo: ALGOS,
   keys: SigningKey[]
-): Promise<Uint8Array | Error> {
+): Promise<boolean | Error> {
   if (algo === ALGOS.ECDSA_256) {
     return verifyECDSA(message, keys)
   } else if (algo === ALGOS.RSA_PSS_256) {

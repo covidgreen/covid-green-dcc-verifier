@@ -123,11 +123,8 @@ export enum PAYLOAD_KEYS {
   CONTENT = -260,
 }
 
-export type CertificateType = {
-  [PAYLOAD_KEYS.ISSUER]: string
-  [PAYLOAD_KEYS.EXPIRES_AT]: number
-  [PAYLOAD_KEYS.ISSUED_AT]: number
-  [PAYLOAD_KEYS.CONTENT]: {
-    1: CertificateContent
-  }
+export enum CERT_TYPE {
+  VACCINE = 'vaccine',
+  TEST = 'test',
+  RECOVERY = 'recovery',
 }

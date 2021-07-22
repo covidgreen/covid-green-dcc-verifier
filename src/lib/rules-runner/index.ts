@@ -13,19 +13,17 @@ export const runRule = (
   data: RuleEvaluationDataContext
 ): RuleEvaluationResult => {
   try {
-    const evalResult = evaluate(rule.logic, data)
+    const evalResult = evaluate(rule.Logic, data)
+
     if (typeof evalResult === 'boolean') {
       return evalResult
     }
-    return {
-      errorMessage: `rule evaluated to a non-boolean: ${JSON.stringify(
-        evalResult
-      )}`,
-    }
+
+    return new Error(
+      `rule evaluated to a non-boolean: ${JSON.stringify(evalResult)}`
+    )
   } catch (e) {
-    return {
-      errorMessage: `rule evaluation errored out: ${e.message}`,
-    }
+    return new Error(`rule evaluation errored out: ${e.message}`)
   }
 }
 
@@ -36,7 +34,7 @@ export const runRuleSet = (
   const ruleEvaluations: { [ruleId: string]: RuleEvaluationResult } = {}
 
   ruleSet.forEach(rule => {
-    ruleEvaluations[rule.id] = runRule(rule, data)
+    ruleEvaluations[rule.Identifier] = runRule(rule, data)
   })
 
   const hasErrors = Object.values(ruleEvaluations).some(

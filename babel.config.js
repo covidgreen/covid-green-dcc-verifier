@@ -32,6 +32,8 @@ module.exports = function (api) {
             '@app': './src',
             crypto: 'crypto-browserify',
             stream: 'stream-browserify',
+            constants: 'constants-browserify',
+            assert: 'assert-browserify',
           },
         },
       ],

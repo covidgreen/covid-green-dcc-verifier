@@ -10,6 +10,7 @@ import {
   HEADER_KEYS,
   PAYLOAD_KEYS,
   CertificateContent,
+  CERT_TYPE,
 } from '@app/types/hcert'
 
 import { SigningKeys, SigningKey } from '../config/types'
@@ -17,9 +18,24 @@ import { SigningKeys, SigningKey } from '../config/types'
 import * as errors from './errors'
 import verifySignature from './verify-signature'
 
+function getCountryData(cert: CertificateContent): string {
+  if (cert.v && cert.v.length > 0) {
+    return cert.v[0].co
+  }
+  if (cert.t && cert.t.length > 0) {
+    return cert.t[0].co
+  }
+  if (cert.r && cert.r.length > 0) {
+    return cert.r[0].co
+  }  
+}
+
 function getCountry(cert: CertificateContent, iss?: string): string | null {
+  if (!cert) {
+    return null
+  }
   try {
-    return iss || (cert.v || cert.t || cert.r)[0].co
+    return iss || getCountryData(cert)
   } catch (e) {
     return null
   }
@@ -49,7 +65,13 @@ function getAlgo(protectedHeader, unprotectedHeader): ALGOS | null {
   }
 }
 
-/*function getSignature(message): string  | null {
+function getCertType(cert: CertificateContent): CERT_TYPE {
+  if (cert.v && cert.v.length > 0) return CERT_TYPE.VACCINE
+  if (cert.t && cert.t.length > 0) return CERT_TYPE.TEST
+  if (cert.r && cert.r.length > 0) return CERT_TYPE.RECOVERY
+}
+
+/* function getSignature(message): string  | null {
   try {
     return cbor.decodeFirstSync(message.value[CBOR_STRUCTURE.SIGNATURE])
   } catch {
@@ -64,19 +86,31 @@ function decodeCbor(qrCbor): {
   expiresAt: number
   cert: CertificateContent
   algo: ALGOS
+  type: CERT_TYPE
 } {
   const message = cbor.decodeFirstSync(Buffer.from(qrCbor))
-  const protectedHeader = cbor.decodeFirstSync(
-    message.value[CBOR_STRUCTURE.PROTECTED_HEADER]
-  )
-  const unprotectedHeader = message.value[CBOR_STRUCTURE.UNPROTECTED_HEADER]
-  const content = cbor.decodeFirstSync(message.value[CBOR_STRUCTURE.PAYLOAD])
-  // const signature = getSignature(message)
+  const decodedMessage = {value: message.value || message }
 
+  const protectedHeader = cbor.decodeFirstSync(
+    decodedMessage.value[CBOR_STRUCTURE.PROTECTED_HEADER]
+  )
+  const unprotectedHeader = decodedMessage.value[CBOR_STRUCTURE.UNPROTECTED_HEADER]
+
+  const content = cbor.decodeFirstSync(decodedMessage.value[CBOR_STRUCTURE.PAYLOAD])
+
+  // const signature = getSignature(decodedMessage)
   const kid = getKid(protectedHeader, unprotectedHeader)
   const algo = getAlgo(protectedHeader, unprotectedHeader)
 
   const cert = mapToJSON(content.get(PAYLOAD_KEYS.CONTENT).get(1))
+  const type = getCertType(cert)
+
+  // move into a function as mapping/transformation grows
+  if (type === CERT_TYPE.TEST) {
+    if (cert.t[0].sc instanceof Date) {
+      cert.t[0].sc = cert.t[0].sc.toISOString()
+    }
+  }
 
   return {
     kid,
@@ -85,6 +119,7 @@ function decodeCbor(qrCbor): {
     expiresAt: content.get(PAYLOAD_KEYS.EXPIRES_AT),
     cert,
     algo,
+    type,
   }
 }
 
@@ -99,7 +134,7 @@ function findKeysToValidateAgainst(
     keys.push(...signingKeys.filter(s => s.kid === kid))
   }
 
-  if (keys.length === 0) {
+  if (keys.length === 0 && !kid) {
     keys.push(...signingKeys.filter(s => s.country === country))
   }
 
@@ -132,7 +167,8 @@ export default async function decodeQR(
       new Date(expiresAt * 1000),
       new Date(issuedAt * 1000),
       algo,
-      keysToUse.length
+      keysToUse.length,
+      cert
     )
 
     if (new Date(expiresAt * 1000) < new Date()) {

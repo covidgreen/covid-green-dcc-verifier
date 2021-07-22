@@ -5,17 +5,20 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { CompositeNavigationProp } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
 import { ItemType } from 'react-native-dropdown-picker'
+import differenceInHours from 'date-fns/differenceInHours'
 
 import Select from '@app/components/Select'
 import PageLayout from '@app/components/PageLayout'
 import Button from '@app/components/Button'
 import ErrorSnackbar from '@app/components/ErrorSnackbar'
+import WarningSnackbar from '@app/components/WarningSnackbar'
 
 import { usePreferences } from '@app/context/preferences'
 import { useConfig } from '@app/context/config'
 import { useTheme } from '@app/context/theme'
 
 import { th } from '@app/lib/theme'
+import { now } from '@app/lib/util'
 
 import { MainStackParamList, RootStackParamList } from '@app/types/routes'
 
@@ -66,6 +69,7 @@ const styles = StyleSheet.create({
     marginHorizontal: th.spacing(6),
     marginBottom: th.spacing(3),
   },
+  btnWrapper: { width: '100%', alignItems: 'center' },
 })
 
 export default function Home({ navigation }: HomeProps) {
@@ -77,6 +81,7 @@ export default function Home({ navigation }: HomeProps) {
     error: configError,
     loading: configLoading,
     refetch: refetchConfig,
+    refreshedAt: refreshedAt,
   } = useConfig()
 
   const handleStartScan = () => navigation.navigate('Scan')
@@ -110,6 +115,8 @@ export default function Home({ navigation }: HomeProps) {
 
     return list
   }, [config, availableCountries])
+
+  const showConfigNotice = differenceInHours(now(), new Date(refreshedAt)) > 24
 
   const allowScan =
     !!configError || configLoading || !prefs?.countryCode || !prefs?.location
@@ -168,18 +175,28 @@ export default function Home({ navigation }: HomeProps) {
             resizeMode="center"
           />
         </View>
-        {configLoading ? (
-          <ActivityIndicator size={50} animating color={theme.colors.primary} />
-        ) : (
-          <Button
-            onPress={handleStartScan}
-            variant="primary"
-            fullWidth
-            disabled={allowScan}
-          >
-            {t('scan')}
-          </Button>
-        )}
+        <View style={styles.btnWrapper}>
+          <WarningSnackbar
+            visible={showConfigNotice}
+            message={t('oldConfigNotice')}
+          />
+          {configLoading ? (
+            <ActivityIndicator
+              size={50}
+              animating
+              color={theme.colors.primary}
+            />
+          ) : (
+            <Button
+              onPress={handleStartScan}
+              variant="primary"
+              fullWidth
+              disabled={allowScan}
+            >
+              {t('scan')}
+            </Button>
+          )}
+        </View>
       </View>
     </PageLayout>
   )

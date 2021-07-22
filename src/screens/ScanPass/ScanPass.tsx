@@ -117,9 +117,9 @@ export default function ScanPass({ navigation, route }: ScanPassProps) {
     if (nextScanIn === 0) navigation.goBack()
   }, [nextScanIn, navigation])
 
-  const vaccination = cert.v?.[0]
-  const test = cert.t?.[0]
-  const recovery = cert.r?.[0]
+  const vaccination = cert.v && cert.v.length > 0 ? cert.v?.[0] : null
+  const test = cert.t && cert.t.length > 0 ? cert.t?.[0] : null
+  const recovery = cert.r && cert.r.length > 0 ? cert.r?.[0] : null
 
   const renderCert = () => {
     if (!config) return null

@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { Text } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
@@ -29,14 +29,16 @@ type ChipProps = {
   bgColor?: string
   icon?: React.ReactNode
   label: React.ReactNode
+  style?: StyleProp<ViewStyle>
 }
 
-function Chip({ color, bgColor, icon, label }: ChipProps) {
+function Chip({ color, bgColor, icon, label, style }: ChipProps) {
   return (
     <View
       style={[
         styles.container,
         { borderColor: color, backgroundColor: bgColor },
+        style,
       ]}
     >
       {icon}

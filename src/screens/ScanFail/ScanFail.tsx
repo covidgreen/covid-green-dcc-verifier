@@ -146,6 +146,7 @@ export default function ScanFail({ navigation, route }: ScanFailProps) {
                 color={theme.palette.error}
                 bgColor={theme.palette.redLighter}
                 label={<Text style={styles.failReason}>{err}</Text>}
+                style={{ borderRadius: 10 }}
               />
             ))}
 

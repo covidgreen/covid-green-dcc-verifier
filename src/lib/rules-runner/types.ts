@@ -1,12 +1,18 @@
 import { CertLogicExpression } from 'certlogic-js'
 
+export type RuleDesc = {
+  lang: string
+  desc: string
+}
+
 /**
  * Types representing rules and rule sets, as read in from a JSON file.
  */
 export type Rule = {
-  id: string
-  logic: CertLogicExpression
-  description: string
+  Identifier: string
+  Country: string
+  Logic: CertLogicExpression
+  Description: RuleDesc[]
 }
 
 export type RuleSet = Rule[]
@@ -35,7 +41,7 @@ export type RuleEvaluationDataContext = {
 /**
  * A type representing the evaluation of a single rule.
  */
-export type RuleEvaluationResult = boolean | { errorMessage: string }
+export type RuleEvaluationResult = boolean | Error
 
 /**
  * A type representing the evaluation of all rules (individually) in a rule set.
