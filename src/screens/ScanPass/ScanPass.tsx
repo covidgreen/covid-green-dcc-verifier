@@ -19,7 +19,7 @@ import { useTheme } from '@app/context/theme'
 import { usePreferences } from '@app/context/preferences'
 
 import { th } from '@app/lib/theme'
-import { formatDate } from '@app/lib/util'
+import { formatDate, getCertName } from '@app/lib/util'
 
 import { MainStackParamList, RootStackParamList } from '@app/types/routes'
 
@@ -92,7 +92,7 @@ export default function ScanPass({ navigation, route }: ScanPassProps) {
   const [paused, setPaused] = useState(prefs.autoCount ? false : true)
   const theme = useTheme()
   const [nextScanIn, setNextScanIn] = useState(10)
-  const { data: cert } = route.params
+  const { data: cert, type } = route.params
 
   const handleClickNext = () => navigation.goBack()
 
@@ -117,9 +117,9 @@ export default function ScanPass({ navigation, route }: ScanPassProps) {
     if (nextScanIn === 0) navigation.goBack()
   }, [nextScanIn, navigation])
 
-  const vaccination = cert.v && cert.v.length > 0 ? cert.v?.[0] : null
-  const test = cert.t && cert.t.length > 0 ? cert.t?.[0] : null
-  const recovery = cert.r && cert.r.length > 0 ? cert.r?.[0] : null
+  const vaccination = cert.v?.[0]
+  const test = cert.t?.[0]
+  const recovery = cert.r?.[0]
 
   const renderCert = () => {
     if (!config) return null
@@ -139,16 +139,14 @@ export default function ScanPass({ navigation, route }: ScanPassProps) {
             contentContainerStyle={styles.scrollContainer}
           >
             <Text style={styles.type}>
-              {t(
-                vaccination ? 'vaccineCert' : test ? 'pcrCert' : 'recoveryCert'
-              )}
+              {t(`certTypes.${type || 'unknown'}`)}
             </Text>
 
             <Chip.Pass />
 
             <View style={styles.header}>
               <Text style={styles.name}>
-                {cert.nam.fn}, {cert.nam.gn}
+                {getCertName(cert)}
               </Text>
               <Text style={styles.dob}>
                 {t('dob')}: {formatDate(cert.dob)}

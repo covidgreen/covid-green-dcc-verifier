@@ -1,4 +1,5 @@
 import format from 'date-fns/format'
+import { CertificateContent } from 'dcc-decoder'
 
 export function now() {
   return new Date()
@@ -7,13 +8,30 @@ export function now() {
 export function formatDate(d: number | string | Date): string {
   if (!d) return null
 
-  return format(new Date(d), 'dd-MMM-yyyy')
+  try {
+    return format(new Date(d), 'dd-MMM-yyyy')
+  } catch(e) {
+    // can't convert to date
+  }
+  return d.toString()
 }
 
 export function formatDateTime(d: number | string | Date): string {
   if (!d) return null
 
-  return format(new Date(d), 'dd-MMM-yyyy hh:mm:ss aa')
+  try {
+    return format(new Date(d), 'dd-MMM-yyyy hh:mm:ss aa')
+  } catch(e) {
+    // can't convert to date
+  }
+  return d.toString()
+}
+
+export function getCertName(cert: CertificateContent):string {
+  const familyName = cert.nam.fn || cert.nam.fnt || ''
+  const givenName = cert.nam.gn || cert.nam.gnt || ''
+
+  return `${familyName}${givenName ? ', ' : ''}${givenName}`
 }
 
 export function mapToJSON(map) {

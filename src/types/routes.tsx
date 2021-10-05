@@ -1,4 +1,4 @@
-import { CertificateContent } from './hcert'
+import { CertificateContent, CERT_TYPE, RuleError } from 'dcc-decoder'
 
 export type MainStackParamList = {
   Home: undefined
@@ -8,10 +8,14 @@ export type MainStackParamList = {
 
 export type RootStackParamList = {
   Main: undefined
-  ScanPass: { data: CertificateContent }
+  ScanPass: {
+    data: CertificateContent
+    type: CERT_TYPE
+  }
   ScanFail: {
     data?: CertificateContent
+    type?: CERT_TYPE
     error: string
-    ruleErrors: string[]
+    ruleErrors: RuleError[]
   }
 }

@@ -40,10 +40,12 @@
     "certificateIssuer": "Certificate issuer",
     "certificateId": "Certificate ID",
 
-    "pcrCert": "Test Certificate",
-    "vaccineCert": "Vaccine Certificate",
-    "recoveryCert": "Recovery Certificate",
-    "unknownCert": "Unknown certificate type",
+    "certTypes": {
+      "t": "Test Certificate",
+      "v": "Vaccine Certificate",
+      "r": "Recovery Certificate",
+      "unknown": "Unknown certificate type"
+    },
 
     "passengerDestination": "Passenger destination",
     "passengerDestinationPlaceholder": "Select passenger destination",

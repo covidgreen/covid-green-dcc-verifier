@@ -14,19 +14,14 @@ import fetch from '@app/lib/fetch'
 import { isMountedRef } from '@app/lib/refs'
 import { now } from '@app/lib/util'
 
-import { ContextType, ConfigType, Valueset } from './types'
-
-function getValuesetsComputed(valuesets) {
-  return Object.keys(valuesets).reduce((acc, key) => {
-    acc[valuesets[key].valueSetId] = Object.keys(valuesets[key].valueSetValues)
-
-    return acc
-  }, {})
-}
+import { ContextType, ConfigType } from './types'
+import { buildValuesetsComputed } from 'dcc-decoder'
 
 const mapConfig = (c): ConfigType => ({
   ...c,
-  valuesets: {
+  signingKeys: c.certs,
+  ruleSet: c.rules,
+  valueSets: {
     countryCodes: c.valueSets.countryCodes.valueSetValues,
     diseaseAgentTargeted: c.valueSets.diseaseAgentTargeted.valueSetValues,
     testManf: c.valueSets.testManf.valueSetValues,
@@ -36,7 +31,7 @@ const mapConfig = (c): ConfigType => ({
     vaccineMedicinalProduct: c.valueSets.vaccineMedicinalProduct.valueSetValues,
     vaccineProphylaxis: c.valueSets.vaccineProphylaxis.valueSetValues,
   },
-  valuesetsComputed: getValuesetsComputed(c.valueSets),
+  valuesetsComputed: buildValuesetsComputed(c.valueSets),
 })
 
 const initialValue: ContextType = {
@@ -50,14 +45,6 @@ const initialValue: ContextType = {
 }
 
 const ConfigContext = createContext<ContextType>(initialValue)
-
-export function getValue(
-  valueset: Record<string, Valueset>,
-  key: string,
-  defaultValue: string = key
-): string {
-  return valueset[key]?.display || defaultValue
-}
 
 export function useConfig() {
   return useContext(ConfigContext)
@@ -103,7 +90,7 @@ export function ConfigProvider({ children }: ConfigProviderProps) {
     async function fetchConfig() {
       setLoading(true)
 
-      console.log('REQUESTING CONFIG')
+      console.log('REQUESTING CONFIG', CONFIG_URL)
       // let newConfig: ConfigType
       const { status, body } = await fetch<ConfigType>(CONFIG_URL)
 

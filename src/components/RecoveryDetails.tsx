@@ -2,11 +2,9 @@ import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import { getValue, useConfig } from '@app/context/config'
-
 import { formatDate } from '@app/lib/util'
 
-import { RecoveryGroup } from '@app/types/hcert'
+import { RecoveryGroup } from 'dcc-decoder'
 
 import LineItem from './LineItem'
 
@@ -20,20 +18,17 @@ const styles = StyleSheet.create({
 
 export default function RecoveryDetails({ data }: RecoveryDetailsProps) {
   const { t } = useTranslation()
-  const {
-    config: { valuesets },
-  } = useConfig()
 
   return (
     <View style={styles.container}>
       <LineItem
         label={t('targetedDisease')}
-        value={getValue(valuesets.diseaseAgentTargeted, data.tg)}
+        value={data.tg}
       />
       <LineItem label={t('firstPositive')} value={formatDate(data.fr)} />
       <LineItem
         label={t('country')}
-        value={getValue(valuesets.countryCodes, data.co)}
+        value={data.co}
       />
       <LineItem label={t('certificateIssuer')} value={data.is} />
       <LineItem label={t('validFrom')} value={formatDate(data.df)} />

@@ -10,13 +10,13 @@ import Spinner from 'react-native-loading-spinner-overlay'
 
 import Button from '@app/components/Button'
 import PageLayout from '@app/components/PageLayout'
-
-import { useVerifier } from '@app/context/verifier'
 import { useLogger } from '@app/context/logger'
 
 import { th } from '@app/lib/theme'
 
 import { MainStackParamList, RootStackParamList } from '@app/types/routes'
+
+import { useVerifier } from '@app/context/verifier'
 
 import Scanner from './components/Scanner'
 
@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
 
 export default function Scan({ navigation }: ScanProps) {
   const { t } = useTranslation()
-  const verifier = useVerifier()
   const logger = useLogger()
+  const verifier = useVerifier()
   const [scanning, setScanning] = useState(false)
   const [verifying, setVerifying] = useState(false)
 
@@ -80,20 +80,23 @@ export default function Scan({ navigation }: ScanProps) {
 
   const handleScan = async (qr: string) => {
     setVerifying(true)
+
     const result = await verifier.run(qr)
+
     logger.log(result)
 
-    const { cert, ruleErrors, error } = result
+    const { cert, ruleErrors, error, type } = result
 
-    if (error || ruleErrors.length) {
+    if (error || (ruleErrors && ruleErrors.length)) {
       return navigation.navigate('ScanFail', {
         error: error?.name,
         data: cert,
+        type,
         ruleErrors,
       })
     }
 
-    navigation.navigate('ScanPass', { data: cert })
+    navigation.navigate('ScanPass', { data: cert, type })
   }
 
   return (

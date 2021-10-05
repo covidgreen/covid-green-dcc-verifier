@@ -18,7 +18,7 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["jest"],
+    "types": ["jest", "node"],
     "paths": {
       "@app/*": ["./*"],
     }

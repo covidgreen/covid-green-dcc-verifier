@@ -104,7 +104,7 @@ export default function Home({ navigation }: HomeProps) {
     if (!config) return []
 
     const list: ItemType[] = availableCountries.map(c => ({
-      label: config.valuesets.countryCodes[c].display,
+      label: config.valueSets.countryCodes[c].display,
       value: c,
     }))
 

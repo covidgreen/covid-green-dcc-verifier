@@ -17,7 +17,7 @@ import { useTheme } from '@app/context/theme'
 import { useConfig } from '@app/context/config'
 
 import { th } from '@app/lib/theme'
-import { formatDate } from '@app/lib/util'
+import { formatDate, getCertName } from '@app/lib/util'
 
 import { MainStackParamList, RootStackParamList } from '@app/types/routes'
 
@@ -90,7 +90,7 @@ export default function ScanFail({ navigation, route }: ScanFailProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const { config } = useConfig()
-  const { data: cert, error, ruleErrors } = route.params
+  const { data: cert, error, ruleErrors, type } = route.params
 
   const handleClickNext = () => navigation.goBack()
 
@@ -116,15 +116,7 @@ export default function ScanFail({ navigation, route }: ScanFailProps) {
             contentContainerStyle={styles.scrollContainer}
           >
             <Text style={styles.type}>
-              {t(
-                vaccination
-                  ? 'vaccineCert'
-                  : test
-                  ? 'pcrCert'
-                  : recovery
-                  ? 'recoveryCert'
-                  : 'unknownCert'
-              )}
+              {t(`certTypes.${type || 'unknown'}`)}
             </Text>
 
             <Chip.Fail />
@@ -145,7 +137,7 @@ export default function ScanFail({ navigation, route }: ScanFailProps) {
                 key={index}
                 color={theme.palette.error}
                 bgColor={theme.palette.redLighter}
-                label={<Text style={styles.failReason}>{err}</Text>}
+                label={<Text style={styles.failReason}>{err.description}</Text>}
                 style={{ borderRadius: 10 }}
               />
             ))}
@@ -153,7 +145,7 @@ export default function ScanFail({ navigation, route }: ScanFailProps) {
             {cert && (
               <View style={styles.header}>
                 <Text style={styles.name}>
-                  {cert.nam.fn}, {cert.nam.gn}
+                {getCertName(cert)}
                 </Text>
                 <Text style={styles.dob}>
                   {t('dob')}: {formatDate(cert.dob)}

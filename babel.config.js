@@ -34,6 +34,7 @@ module.exports = function (api) {
             stream: 'stream-browserify',
             constants: 'constants-browserify',
             assert: 'assert-browserify',
+            zlib: 'zlib-browserify'
           },
         },
       ],

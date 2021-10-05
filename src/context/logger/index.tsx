@@ -11,7 +11,7 @@ import React, {
 import { isMountedRef } from '@app/lib/refs'
 import { now } from '@app/lib/util'
 
-import { VerificationResult } from '../verifier/types'
+import { VerificationResult } from 'dcc-decoder'
 import { usePreferences } from '../preferences'
 
 import transformToLog from './transform'

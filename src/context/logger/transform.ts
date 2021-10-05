@@ -1,35 +1,15 @@
-import { CertificateContent } from '@app/types/hcert'
-import { VerificationResult } from '../verifier/types'
+import { VerificationResult } from 'dcc-decoder'
+
 import { LogEntry } from './types'
 
-
-function getCountryData(cert: CertificateContent): string {
-  if (cert.v && cert.v.length > 0) {
-    return cert.v[0].co
-  }
-  if (cert.t && cert.t.length > 0) {
-    return cert.t[0].co
-  }
-  if (cert.r && cert.r.length > 0) {
-    return cert.r[0].co
-  }  
-}
-
-function getTypeData(cert: CertificateContent): 'vaccine' | 'test' | 'recovery' | 'unknown' {
-  if (cert.v && cert.v.length > 0) {
-    return 'vaccine'
-  }
-  if (cert.t && cert.t.length > 0) {
-    return 'test'
-  }
-  if (cert.r && cert.r.length > 0) {
-    return 'recovery'
-  }  
-  return 'unknown'
+enum typeMap {
+  v = 'vaccine',
+  t = 'test',
+  r = 'recovery',
 }
 
 export default function transformToLog(
-  { cert, error, ruleErrors }: VerificationResult,
+  { rawCert, error, ruleErrors, type }: VerificationResult,
   { location }: Record<string, unknown> = {}
 ) {
   const entry = {
@@ -38,10 +18,9 @@ export default function transformToLog(
     type: 'unknown', // will get replaced if we have a cert
   } as LogEntry
 
-  if (cert) {    
-    entry.type = getTypeData(cert)
-    console.log(cert)
-    entry.country = getCountryData(cert)
+  if (rawCert) {
+    entry.type = typeMap[type]
+    entry.country = rawCert[type][0].co
     entry.passed = true
   }
 
