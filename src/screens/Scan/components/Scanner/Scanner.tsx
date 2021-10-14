@@ -65,8 +65,13 @@ export default function Scanner({ onScan }: ScannerProps) {
 
   useEffect(() => {
     const fn = async () => {
-      const { status } = await Camera.requestPermissionsAsync()
-      setHasPermission(status === 'granted')
+      try {
+        const { status } = await Camera.requestPermissionsAsync()
+        console.log('Camera status', status)
+        setHasPermission(status === 'granted')
+      } catch(e) {
+        console.log(e, 'failed to request camera permissions')
+      }
     }
 
     fn()

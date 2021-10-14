@@ -148,7 +148,7 @@ export default function ScanFail({ navigation, route }: ScanFailProps) {
                 {getCertName(cert)}
                 </Text>
                 <Text style={styles.dob}>
-                  {t('dob')}: {formatDate(cert.dob)}
+                  {t('dob')}: {cert.dob}
                 </Text>
               </View>
             )}

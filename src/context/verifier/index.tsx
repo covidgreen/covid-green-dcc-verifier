@@ -28,7 +28,7 @@ export function VerifierProvider({ children }) {
   const run = useCallback<ContextType['run']>(
     async qr => {
       try {
-        const { cert, error, ruleErrors, type, wrapperData } = await decodeAndValidateRules({source: {qrData: qr}, ruleCountry: prefs?.countryCode, dccData: config})
+        const { cert, error, ruleErrors, type, wrapperData } = await decodeAndValidateRules({source: [qr], ruleCountry: prefs?.countryCode, dccData: config})
 
         console.log('Scan Info', wrapperData, cert)
         if (!cert) return { error: t(error.name) }

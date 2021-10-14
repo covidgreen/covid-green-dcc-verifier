@@ -149,7 +149,7 @@ export default function ScanPass({ navigation, route }: ScanPassProps) {
                 {getCertName(cert)}
               </Text>
               <Text style={styles.dob}>
-                {t('dob')}: {formatDate(cert.dob)}
+                {t('dob')}: {cert.dob}
               </Text>
             </View>
 
