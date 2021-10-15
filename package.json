@@ -52,7 +52,7 @@
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.4.0",
     "react-native-ssl-pinning": "^1.5.4",
-    "react-native-unimodules": "^0.13.3",
+    "react-native-unimodules": "^0.14.8",
     "react-native-vector-icons": "^8.1.0",
     "react-zlib-js": "^1.0.5",
     "stream-browserify": "^3.0.0",
