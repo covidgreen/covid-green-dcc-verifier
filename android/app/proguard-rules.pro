@@ -12,3 +12,4 @@
 -keepattributes LineNumberTable,SourceFile,Signature
 -keep public class com.horcrux.svg.** {*;}
 -keep class com.facebook.react.turbomodule.** { *; }
+-renamesourcefileattribute SourceFile
